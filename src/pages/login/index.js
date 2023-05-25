@@ -1,5 +1,8 @@
 import React from "react";
 import { View, Text, StyleSheet, TextInput, TouchableOpacity } from "react-native";
+import { initializeApp } from "firebase/app";
+import { getAuth, createUserWithEmailAndPassword , signInWithEmailAndPassword} from "firebase/auth";
+import { firebaseConfig } from "../../../firebase-config"
 
 import * as Animatable from 'react-native-animatable';
 
@@ -7,6 +10,26 @@ import { useNavigation } from "@react-navigation/native";
 
 export default function Login() {
     const navigation = useNavigation();
+
+    const [Email, setEmail] = React.useState('');
+    const [Senha, setSenha] = React.useState('');
+
+    const app = initializeApp(firebaseConfig);  
+    const auth = getAuth(app);
+
+    function handleLogin() {
+        signInWithEmailAndPassword(auth, Email, Senha)
+        .then((userCredential) => {
+            // Signed in 
+            const user = userCredential.user;
+            console.log(user, "Logado com sucesso!");
+            // ...
+        }).catch((error) => {
+            const errorCode = error.code;
+            const errorMessage = error.message;
+            console.log(errorMessage);
+        })};
+
 
     return (
     <View 
@@ -26,13 +49,19 @@ export default function Login() {
          <Text style={styles.label}>
              Email
         </Text>
-        <TextInput style={styles.input} placeholder="Digite o Email.."/>
+        <TextInput 
+        onChangeText={(text) => setEmail(text)}
+        style={styles.input} placeholder="Digite o Email.."/>
         <Text style={styles.label}>
              Senha
         </Text>
-        <TextInput style={styles.input} placeholder="Digite a Senha.."/>
+        <TextInput
+        secureTextEntry={true}
+        onChangeText={(text) => setSenha(text)}
+        style={styles.input} placeholder="Digite a Senha.."/>
 
-        <TouchableOpacity style={styles.button}>
+        <TouchableOpacity onPress={handleLogin
+        } style={styles.button}>
             <Text style={styles.textButton}>Entrar</Text>
         </TouchableOpacity>
 

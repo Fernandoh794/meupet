@@ -1,16 +1,38 @@
 import React from "react";
 import { View, Text, StyleSheet, TextInput, TouchableOpacity } from "react-native";
+import { getAuth, createUserWithEmailAndPassword , signInWithEmailAndPassword} from "firebase/auth";
+import { firebaseConfig } from "../../../firebase-config"
+import { initializeApp } from "firebase/app";
 
+import { useNavigation } from "@react-navigation/native";
 import * as Animatable from 'react-native-animatable';
 
 export default function Register() {
+    const navigation = useNavigation();
+
+
         const [data, setData] = React.useState({
         nome: '',
         email: '',
         password: '',
-        confirm_password: '',
+
     });
-        console.log(data);
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+
+    const handleCreateAcount = () => {
+        createUserWithEmailAndPassword(auth, data.email, data.password).then
+        (userCredential => {
+            alert('Conta criada com sucesso! Agora faça Login :) ');
+            navigation.navigate('Login')
+        }) 
+        .catch(error => {
+            error.code === 'auth/email-already-in-use' ?
+            alert('Email já cadastrado!') : 
+            alert('Erro ao cadastrar, tente novamente mais tarde!');
+        })
+    }
 
     return (
     <View 
@@ -48,15 +70,8 @@ export default function Register() {
         onChangeText={(text) => setData({...data, password: text})}
         secureTextEntry={true}
         style={styles.input} placeholder="Digite a Senha.."/>
-        <Text style={styles.label}>
-             Confirmação de senha
-        </Text>
-        <TextInput
-        onChangeText={(text) => setData({...data, confirm_password: text})}
-        secureTextEntry={true}
-        style={styles.input} placeholder="Digite a Senha.."/>
-
         <TouchableOpacity
+        onPress={handleCreateAcount}
          style={styles.button}>
             <Text style={styles.textButton}>Registrar</Text>
         </TouchableOpacity>
