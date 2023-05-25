@@ -23,17 +23,26 @@ export default function Home() {
 
   const handleAtualizarPerfil = () => {
     // Navegar para a tela de atualização de perfil
-    navigation.navigate('AtualizarPerfil');
-  };
-
-  const handleDoacoes = () => {
-    // Navegar para a tela de doações
-    navigation.navigate('Doacoes');
+    navigation.navigate('Atualizar');
   };
 
   return (
     <View style={styles.container}>
       <View style={styles.header}>
+      <TouchableOpacity style={
+        {backgroundColor: '#ffffff',
+        padding: 5,
+        borderRadius: 5,
+        width: screenWidth * 0.2,
+        alignItems: 'flex-end',
+        marginBottom: 20,
+        marginTop: 20,
+        }
+      } onPress={() => {
+        alert("Em Breve!");
+      }}>
+          <Text>Sair</Text>
+        </TouchableOpacity>
         <View style={styles.titleContainer}>
           <Text style={styles.title}>Bem-vindo(a), {nomeUsuario}!</Text>
         </View>
@@ -44,20 +53,27 @@ export default function Home() {
 
       <View style={styles.content}>
         <TouchableOpacity style={styles.button} onPress={handleCadastrarAdocoes}>
-          <Text style={styles.buttonText}>Cadastrar Adoções</Text>
+          <Text style={styles.buttonText}>Cadastrar Pets</Text>
         </TouchableOpacity>
 
         <TouchableOpacity style={styles.button} onPress={handleProcurarAdocoes}>
-          <Text style={styles.buttonText}>Procurar Adoções</Text>
+          <Text style={styles.buttonText}>Procurar Pets</Text>
         </TouchableOpacity>
 
         <TouchableOpacity style={styles.button} onPress={handleAtualizarPerfil}>
           <Text style={styles.buttonText}>Atualizar Perfil</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.button} onPress={handleDoacoes}>
+        <TouchableOpacity onPress={() => {
+          alert("Em Breve!");
+        }} style={styles.button}>
           <Text style={styles.buttonText}>Doações</Text>
         </TouchableOpacity>
+          <View style={styles.footer}>
+            <Text onPress={() => {
+              alert("Em Breve!");
+            }} style={{color: '#ffffff', fontSize: 12}}>Desenvolvido por: Fernando Henrique</Text>
+          </View>
       </View>
     </View>
   );
@@ -114,5 +130,10 @@ const styles = StyleSheet.create({
     color: '#38a69d',
     fontSize: 18,
     fontWeight: 'bold',
+  },
+  footer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'flex-end',
   },
 });

@@ -6,6 +6,7 @@ import BemVindo from './src/pages/bemvindo';
 import Login from './src/pages/login';
 import Register from './src/pages/register';
 import Home from './src/pages/home';
+import AtualizarPerfil from './src/pages/perfil';
 
 const Stack = createNativeStackNavigator();
 
@@ -21,6 +22,8 @@ const Stack = createNativeStackNavigator();
       }} name="Registro" component={Register} />
         <Stack.Screen options={{headerShown: false
       }} name="Home" component={Home} />
+              <Stack.Screen options={{headerShown: false
+      }} name="Atualizar" component={AtualizarPerfil} />
       
     </Stack.Navigator>
   );
