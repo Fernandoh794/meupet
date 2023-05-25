@@ -1,6 +1,6 @@
 import React from "react";
 import { View, Text, StyleSheet, TextInput, TouchableOpacity } from "react-native";
-import { getAuth, createUserWithEmailAndPassword , signInWithEmailAndPassword} from "firebase/auth";
+import { getAuth, createUserWithEmailAndPassword , signInWithEmailAndPassword, updateProfile} from "firebase/auth";
 import { firebaseConfig } from "../../../firebase-config"
 import { initializeApp } from "firebase/app";
 
@@ -9,7 +9,6 @@ import * as Animatable from 'react-native-animatable';
 
 export default function Register() {
     const navigation = useNavigation();
-
 
         const [data, setData] = React.useState({
         nome: '',
@@ -24,6 +23,10 @@ export default function Register() {
     const handleCreateAcount = () => {
         createUserWithEmailAndPassword(auth, data.email, data.password).then
         (userCredential => {
+            const user = userCredential.user;
+            updateProfile(auth.currentUser, {
+                displayName: data.nome
+            })
             alert('Conta criada com sucesso! Agora faça Login :) ');
             navigation.navigate('Login')
         }) 
