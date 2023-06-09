@@ -1,8 +1,9 @@
 import React from "react";
 import { View, Text, StyleSheet, TextInput, TouchableOpacity } from "react-native";
-import { initializeApp } from "firebase/app";
-import { getAuth, createUserWithEmailAndPassword , signInWithEmailAndPassword} from "firebase/auth";
-import { firebaseConfig } from "../../../firebase-config"
+import axios from "axios";
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+
 
 import * as Animatable from 'react-native-animatable';
 
@@ -13,23 +14,28 @@ export default function Login() {
 
     const [Email, setEmail] = React.useState('');
     const [Senha, setSenha] = React.useState('');
-
-    const app = initializeApp(firebaseConfig);  
-    const auth = getAuth(app);
+    let url = "https://api-meupet-production.up.railway.app/api/login";
 
     function handleLogin() {
-        signInWithEmailAndPassword(auth, Email, Senha)
-        .then((userCredential) => {
-            // Signed in 
-            const user = userCredential.user;
-            navigation.navigate('Home')
-            // ...
-        }).catch((error) => {
-            const errorCode = error.code;
-            const errorMessage = error.message;
-            console.log(errorMessage);
-        })};
+        axios.post(url, {
+            email: Email,
+            password: Senha
+        })
+        .then(function (response) {
+            if(response.status == 200){
+                const token = response.data.access_token.split("|")[1];
+                AsyncStorage.setItem('token', token);
+                alert("Login realizado com sucesso!");
+                navigation.navigate("Home");
+            }
+        })
+        .catch(function (error) {
+            alert("Erro ao realizar login!" + error);
+            console.log(error);
+        });
 
+      
+        }
 
     return (
     <View 

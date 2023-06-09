@@ -1,15 +1,11 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Dimensions, Image } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { getAuth } from "firebase/auth";
-import { initializeApp } from 'firebase/app';
-import { firebaseConfig } from '../../../firebase-config';
+
 
 export default function Home() {
-  const app = initializeApp(firebaseConfig);
-  auth = getAuth(app);
   const navigation = useNavigation();
-  const nomeUsuario = auth.currentUser.displayName;
+  const nomeUsuario = "Fernando";
 
   const handleCadastrarAdocoes = () => {
     // Navegar para a tela de cadastro de adoções

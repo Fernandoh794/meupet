@@ -1,9 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Dimensions, Image, TextInput } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { getAuth, updateProfile } from "firebase/auth";
-import { initializeApp } from 'firebase/app';
-import { firebaseConfig } from '../../../firebase-config';
+
 import * as Animatable from 'react-native-animatable';
 
 export default function AtualizarPerfil() {
@@ -14,26 +12,14 @@ export default function AtualizarPerfil() {
         password: '',
     });
 
-  const app = initializeApp(firebaseConfig);
-  auth = getAuth(app);
+
   const navigation = useNavigation();
   const nomeUsuario = auth.currentUser.displayName;
 
   function handleAtualizarPerfil() {
-    console.log(data)
-        updateProfile(auth.currentUser, {
-            displayName: data.nome,
-            email: data.email,
-            password: data.password
-        }).then(() => {
-            alert('Perfil Atualizado com Sucesso!')
-            navigation.navigate('Home')
-        }).catch((error) => {
-            console.log(error);
-        });
+  }
+  
 
-        navigation.navigate('Home')
-}
     
 
   return (

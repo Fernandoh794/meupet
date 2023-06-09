@@ -1,9 +1,6 @@
 import React from "react";
 import { View, Text, StyleSheet, TextInput, TouchableOpacity } from "react-native";
-import { getAuth, createUserWithEmailAndPassword , signInWithEmailAndPassword, updateProfile} from "firebase/auth";
-import { firebaseConfig } from "../../../firebase-config"
-import { initializeApp } from "firebase/app";
-
+import axios from "axios";
 import { useNavigation } from "@react-navigation/native";
 import * as Animatable from 'react-native-animatable';
 
@@ -17,24 +14,24 @@ export default function Register() {
 
     });
 
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-
+    let url = "https://api-meupet-production.up.railway.app/api/register";
     const handleCreateAcount = () => {
-        createUserWithEmailAndPassword(auth, data.email, data.password).then
-        (userCredential => {
-            const user = userCredential.user;
-            updateProfile(auth.currentUser, {
-                displayName: data.nome
-            })
-            alert('Conta criada com sucesso! Agora faça Login :) ');
-            navigation.navigate('Login')
-        }) 
-        .catch(error => {
-            error.code === 'auth/email-already-in-use' ?
-            alert('Email já cadastrado!') : 
-            alert('Erro ao cadastrar, tente novamente mais tarde!');
+        axios.post(url, {
+            name: data.nome,
+            email: data.email,
+            password: data.password
         })
+        .then(function (response) {
+            if(response.status == 201){
+                alert("Conta criada com sucesso!");
+                navigation.navigate("Login");
+            }
+        })
+        .catch(function (error) {
+            alert("Erro ao criar conta!" + error);
+            console.log(error);
+        });
+        
     }
 
     return (
