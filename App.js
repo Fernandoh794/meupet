@@ -14,17 +14,24 @@ const Stack = createNativeStackNavigator();
  function Routes() {
   return (
     <Stack.Navigator>
-     <Stack.Screen options={{headerShown: false
+
+  {/*    <Stack.Screen options={{headerShown: false
       }} name="Bem Vindo!" component={BemVindo} /> 
+
       <Stack.Screen  options={{headerShown: false
       }} name="Login" component={Login} /> 
+
        <Stack.Screen options={{headerShown: false
       }} name="Registro" component={Register} />
+
+<Stack.Screen options={{headerShown: false
+      }} name="Atualizar" component={AtualizarPerfil} />
+    */}
+
         <Stack.Screen options={{headerShown: false
       }} name="Home" component={Home} />
-              <Stack.Screen options={{headerShown: false
-      }} name="Atualizar" component={AtualizarPerfil} />
-      
+
+
     </Stack.Navigator>
   );
 }

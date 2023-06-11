@@ -87,6 +87,7 @@ const styles = StyleSheet.create({
         backgroundColor: '#38a69d'
     },
     message: {
+        backgroundColor: '#38a69d',
         marginTop: '10%',
         marginBottom: '8%',
         marginLeft: '8%',
