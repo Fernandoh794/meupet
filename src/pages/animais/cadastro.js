@@ -1,9 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, Button, StyleSheet } from 'react-native';
+import { View, Text, TextInput, Button, StyleSheet, Alert } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import * as DocumentPicker from 'expo-document-picker';
 import Icon from 'react-native-vector-icons/Feather';
 import axios from 'axios';
+import uuid from 'react-native-uuid';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+
 
 export default function CadastrarAnimais() {
   const [nome, setNome] = useState('');
@@ -16,11 +20,13 @@ export default function CadastrarAnimais() {
   const [descricao, setDescricao] = useState('');
   const [estados, setEstados] = useState([]);
   const [cidades, setCidades] = useState([]);
+  const [urlImagem, setUrlImagem] = useState('');
 
   useEffect(() => {
     carregarEstados();
   }, []);
 
+  // Implemente a lógica para carregar os estados da API do IBGE
   const carregarEstados = async () => {
     try {
       const response = await axios.get('https://servicodados.ibge.gov.br/api/v1/localidades/estados');
@@ -30,6 +36,7 @@ export default function CadastrarAnimais() {
     }
   };
 
+  // Implemente a lógica para carregar as cidades de acordo com o estado selecionado
   const carregarCidades = async (estadoId) => {
     try {
       const response = await axios.get(`https://servicodados.ibge.gov.br/api/v1/localidades/estados/${estadoId}/municipios`);
@@ -39,18 +46,98 @@ export default function CadastrarAnimais() {
     }
   };
 
-  const handleCadastrarAnimal = () => {
-    // Implemente a lógica para cadastrar um novo animal
-  };
 
-  const handlePickImage = async () => {
-    const result = await DocumentPicker.getDocumentAsync({ type: 'image/*' });
+  // Implemente a lógica para fazer upload da imagem no Cloudinary
+  const uploadImageClodinary = async () => {
+    const data = new FormData();
+    const randomName = `${uuid.v4()}.jpg`;
 
-    if (!result.cancelled) {
-      setImagem(result.uri);
+    data.append('file', {
+      uri: imagem,
+      type: 'image/jpeg',
+      name: randomName,
+    });
+    data.append('upload_preset', 'vjj0zt6u');
+    data.append('cloud_name', 'dfimkeeif');
+    
+    try {
+      const response = await fetch('https://api.cloudinary.com/v1_1/dfimkeeif/image/upload', {
+        method: 'POST',
+        body: data
+      });
+
+      const jsonData = await response.json();
+      setUrlImagem(jsonData.url);
+      console.log(urlImagem);
+      handleCadastrarAnimal();
+    } catch (error) {
+      Alert.alert('Erro', 'Erro ao fazer upload da imagem');
+      console.log('Erro ao fazer upload da imagem:', error);
     }
   };
 
+
+  /**
+   * {
+    "nome": "Fido",
+    "raca": "Labrador Retriever",
+    "data_nascimento": "2018-01-01 12:00:00",
+    "sexo": "Macho",
+    "estado_cod": "2",
+    "cidade_cod": "25",
+    "imagem": "https://example.com/imagem.jpg",
+    "descricao": "Um cãozinho muito amigável e brincalhão."
+    }
+   */
+  // Implemente a lógica para cadastrar um novo animal
+  const handleCadastrarAnimal = () => {
+    const urlPost = "https://api-meupet-production.up.railway.app/api/animais-adocao";
+      const token = AsyncStorage.getItem('token');  
+      console.log(token);
+      const data = {
+        nome: nome,
+        raca: raca,
+        sexo: sexo,
+        data_nascimento: "2018-01-01 12:00:00",
+        estado_cod: estado,
+        cidade_cod: cidade,
+        imagem: urlImagem,
+        descricao: descricao
+
+      }
+      console.log(data)
+      const headers = {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      }
+      axios.post(urlPost, data, {headers: headers})
+      .then((response) => {
+        console.log(response);
+        Alert.alert('Sucesso', 'Animal cadastrado com sucesso!');
+      }
+      )
+      .catch((error) => {
+        console.log(error);
+        Alert.alert('Erro', 'Erro ao cadastrar animal!');
+      }
+      )
+
+  };
+
+  // Implemente a lógica para selecionar uma imagem da galeria
+  const handlePickImage = async () => {
+    try {
+      const result = await DocumentPicker.getDocumentAsync({ type: 'image/*' });
+
+      if (!result.cancelled) {
+        setImagem(result.uri);
+      }
+    } catch (error) {
+      console.log('Erro ao selecionar imagem:', error);
+    }
+  };
+
+  // Implemente a lógica para cadastrar um novo animal
   const handleEstadoChange = (value) => {
     setEstado(value);
     if (value) {
@@ -131,7 +218,7 @@ export default function CadastrarAnimais() {
         <View style={styles.buttonContainer}>
           <Button
             title="Cadastrar"
-            onPress={handleCadastrarAnimal}
+            onPress={uploadImageClodinary}
             color="black"
           />
         </View>
