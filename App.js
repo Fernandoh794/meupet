@@ -7,6 +7,7 @@ import Login from './src/pages/login';
 import Register from './src/pages/register';
 import Home from './src/pages/home';
 import AtualizarPerfil from './src/pages/perfil';
+import CadastrarAnimais from './src/pages/animais/cadastro';
 
 const Stack = createNativeStackNavigator();
 
@@ -28,6 +29,9 @@ const Stack = createNativeStackNavigator();
       }} name="Atualizar" component={AtualizarPerfil} />
     */}
 
+      
+<Stack.Screen options={{headerShown: false
+      }} name="CadatrarAnimais" component={CadastrarAnimais} />
         <Stack.Screen options={{headerShown: false
       }} name="Home" component={Home} />
 

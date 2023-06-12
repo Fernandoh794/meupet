@@ -70,6 +70,7 @@ export default function Home() {
   };
 
   const handleMenuOptionSelect = (option) => {
+    console.log(option);
     if (option === 'cadastrar') {
       handleCadastrarAnimal();
     } else if (option === 'meus-anuncios') {
@@ -94,13 +95,6 @@ export default function Home() {
     // Implemente a lógica para navegar para a tela de "Minhas Adoções"
   };
 
-  if (animais.length === 0) {
-    return (
-      <View style={styles.loadingContainer}>
-        <Text style={styles.loadingText}>Carregando animais...</Text>
-      </View>
-    );
-  }
 
   const dropdownOpacity = dropdownAnim.interpolate({
     inputRange: [0, 1],
