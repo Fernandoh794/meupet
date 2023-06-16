@@ -28,7 +28,8 @@ export default function CadastrarAnimais() {
 
   // Implemente a lógica para carregar os estados da API do IBGE
   const carregarEstados = async () => {
-    try {
+
+        try {
       const response = await axios.get('https://servicodados.ibge.gov.br/api/v1/localidades/estados');
       setEstados(response.data);
     } catch (error) {
@@ -92,37 +93,53 @@ export default function CadastrarAnimais() {
   // Implemente a lógica para cadastrar um novo animal
   const handleCadastrarAnimal = () => {
     const urlPost = "https://api-meupet-production.up.railway.app/api/animais-adocao";
-      const token = AsyncStorage.getItem('token');  
-      console.log(token);
-      const data = {
-        nome: nome,
-        raca: raca,
-        sexo: sexo,
-        data_nascimento: "2018-01-01 12:00:00",
-        estado_cod: estado,
-        cidade_cod: cidade,
-        imagem: urlImagem,
-        descricao: descricao
+  
+    // Recuperar o token do AsyncStorage
+    AsyncStorage.getItem('access_token')
+      .then((token) => {
+        if (token) {
+          const data = {
+            nome: nome,
+            raca: raca,
+            sexo: sexo,
+            idade: idade,
+            estado_cod: estado,
+            cidade_cod: cidade,
+            imagem: urlImagem,
+            descricao: descricao
+          };
 
-      }
-      console.log(data)
-      const headers = {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
-      }
-      axios.post(urlPost, data, {headers: headers})
-      .then((response) => {
-        console.log(response);
-        Alert.alert('Sucesso', 'Animal cadastrado com sucesso!');
-      }
-      )
+          console.log(data);
+          
+  
+          const headers = {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          };
+ 
+          axios.post(urlPost, data, { headers: headers })
+            .then((response) => {
+              console.log(response);
+              Alert.alert('Sucesso', 'Animal cadastrado com sucesso!');
+            })
+            .catch((error) => {
+              console.log(error);
+              Alert.alert('Erro', 'Erro ao cadastrar animal!');
+            });
+        } else {
+          // Caso o token não esteja disponível no AsyncStorage
+          Alert.alert('Erro', 'Token de acesso não encontrado!');
+        }
+
+
+
+      })
       .catch((error) => {
         console.log(error);
-        Alert.alert('Erro', 'Erro ao cadastrar animal!');
-      }
-      )
-
+        Alert.alert('Erro', 'Erro ao recuperar o token de acesso!');
+      });
   };
+  
 
   // Implemente a lógica para selecionar uma imagem da galeria
   const handlePickImage = async () => {

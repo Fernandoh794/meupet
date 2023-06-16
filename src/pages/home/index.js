@@ -2,54 +2,51 @@ import React, { useEffect, useState, useRef } from 'react';
 import { View, Text, ScrollView, Image, StyleSheet, TouchableOpacity, TouchableWithoutFeedback, Animated } from 'react-native';
 import axios from 'axios';
 import Icon from 'react-native-vector-icons/Feather';
+import { useNavigation } from "@react-navigation/native";
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useRoute } from '@react-navigation/native';
 
 export default function Home() {
-  const url = "https://api-meupet-production.up.railway.app/api/animais-adocao";
   const [animais, setAnimais] = useState([]);
   const [menuOpen, setMenuOpen] = useState(false);
   const dropdownAnim = useRef(new Animated.Value(0)).current;
+  const navigation = useNavigation();
+  const route = useRoute();
+  const { estado_cod, cidade_cod } = route.params;
+  const url = "https://api-meupet-production.up.railway.app/api/animais-adocao" + (estado_cod ? `?estado_cod=${estado_cod}` : '') + (cidade_cod ? `&cidade_cod=${cidade_cod}` : '');
 
+  // funcao que é executada quando a tela é carregada
   useEffect(() => {
-    const fetchAnimais = async () => {
-      try {
-        const response = await axios.get(url);
-        const animaisData = response.data;
-
-        const animaisComImagem = await Promise.all(animaisData.map(async (animal) => {
-          const imagem = await gerarImagemAleatoria();
-          return {
-            ...animal,
-            imagem: imagem
-          };
-        }));
-
-        setAnimais(animaisComImagem);
-      } catch (error) {
-        console.log(error);
-      }
-    };
-
-    fetchAnimais();
+    carregarAnimais();
   }, []);
 
-  const gerarImagemAleatoria = async () => {
-    try {
-      const response = await axios.get('https://dog.ceo/api/breeds/image/random');
-      return response.data.message;
-    } catch (error) {
-      console.log(error);
-    }
+
+
+  // funcao que carrega os animais da API passando o token de autenticacao
+  const carregarAnimais = async () => {
+    AsyncStorage.getItem('access_token')
+      .then((token) => { 
+        axios.get(url, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        })
+          .then((response) => {
+            console.log('Animais carregados com sucesso:', response.data);
+            setAnimais(response.data);
+          })
+          .catch((error) => {
+            console.log('Erro ao carregar animais:', error);
+          });
+      })
+      .catch((error) => {
+        console.log('Erro ao recuperar o token:', error);
+      });
   };
 
-  const calcularIdade = (dataNascimento) => {
-    const nascimento = new Date(dataNascimento);
-    const hoje = new Date();
-    const diff = Math.abs(hoje - nascimento);
-    return Math.floor(diff / (1000 * 60 * 60 * 24 * 365.25));
-  };
-
+  // funcao que navega para a tela de detalhes do animal
   const handleCadastrarAnimal = () => {
-    // Implemente a lógica para cadastrar um novo animal
+    navigation.navigate("CadastrarAnimais");
   };
 
   const handlePesquisar = () => {
@@ -60,6 +57,8 @@ export default function Home() {
     // Implemente a lógica para realizar o logout do usuário
   };
 
+  
+  // funcao que é executada quando o botao de menu é clicado
   const handleDropdownToggle = () => {
     setMenuOpen((prevState) => !prevState);
     Animated.timing(dropdownAnim, {
@@ -69,6 +68,8 @@ export default function Home() {
     }).start();
   };
 
+
+  // funcao responsavel por tratar a opcao selecionada no menu
   const handleMenuOptionSelect = (option) => {
     console.log(option);
     if (option === 'cadastrar') {
@@ -83,6 +84,7 @@ export default function Home() {
     setMenuOpen(false);
   };
 
+
   const handleMeusAnuncios = () => {
     // Implemente a lógica para navegar para a tela de "Meus Anúncios"
   };
@@ -95,6 +97,9 @@ export default function Home() {
     // Implemente a lógica para navegar para a tela de "Minhas Adoções"
   };
 
+  const handleAdotar = (id) => {
+      navigation.navigate("AdotarAnimal", { id });
+  };
 
   const dropdownOpacity = dropdownAnim.interpolate({
     inputRange: [0, 1],
@@ -105,6 +110,8 @@ export default function Home() {
     inputRange: [0, 1],
     outputRange: [-100, 0],
   });
+
+
 
   return (
     <View style={styles.container}>
@@ -146,12 +153,17 @@ export default function Home() {
         {animais.map((animal) => (
           <View style={styles.card} key={animal.id}>
             <Image source={{ uri: animal.imagem }} style={styles.imagem} />
-            <View style={styles.cardContent}>
+            <View  style={styles.cardContent}>
               <Text style={styles.nome}>{animal.nome}</Text>
               <Text style={styles.descricao}>{animal.descricao}</Text>
               <Text style={styles.info}>Raça: {animal.raca}</Text>
               <Text style={styles.info}>Sexo: {animal.sexo}</Text>
-              <Text style={styles.info}>Idade: {calcularIdade(animal.data_nascimento)} anos</Text>
+              <Text style={styles.info}>Idade: {animal.idade} anos</Text>
+              <TouchableOpacity onPress={() => handleAdotar(animal.id)}>
+              <View style={styles.adotarButton}>
+                <Text style={styles.adotarButtonText}>Adotar</Text>
+              </View>
+            </TouchableOpacity>
             </View>
           </View>
         ))}
@@ -242,5 +254,19 @@ const styles = StyleSheet.create({
   },
   info: {
     marginBottom: 4,
+  },
+  adotarButton: {
+    backgroundColor: 'black',
+    borderRadius: 24,
+    paddingVertical: 6,
+    paddingHorizontal: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 10,
+  },
+  adotarButtonText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: 'bold',
   },
 });

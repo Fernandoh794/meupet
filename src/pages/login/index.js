@@ -11,31 +11,36 @@ import { useNavigation } from "@react-navigation/native";
 
 export default function Login() {
     const navigation = useNavigation();
-
     const [Email, setEmail] = React.useState('');
     const [Senha, setSenha] = React.useState('');
     let url = "https://api-meupet-production.up.railway.app/api/login";
 
     function handleLogin() {
         axios.post(url, {
-            email: Email,
-            password: Senha
+          email: Email,
+          password: Senha
         })
         .then(function (response) {
-            if(response.status == 200){
-                const token = response.data.access_token.split("|")[1];
-                AsyncStorage.setItem('token', token);
-                alert("Login realizado com sucesso!");
-                navigation.navigate("Home");
-            }
+          if(response.status == 200){
+            const token = response.data.access_token.split("|")[1];
+            alert("Login realizado com sucesso!");
+            // Salvar o token no AsyncStorage
+            AsyncStorage.setItem('access_token', token)
+            AsyncStorage.setItem('user_logado', response.data.user.name)
+            
+              .then(() => {
+                navigation.navigate("Filter");
+              })
+              .catch((error) => {
+                console.log(error);
+              });
+          }
         })
         .catch(function (error) {
-            alert("Erro ao realizar login!" + error);
-            console.log(error);
+          alert("Erro ao realizar login!" + error);
+          console.log(error);
         });
-
-      
-        }
+      }
 
     return (
     <View 
