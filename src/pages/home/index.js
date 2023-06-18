@@ -15,6 +15,9 @@ export default function Home() {
   const { estado_cod, cidade_cod } = route.params;
   const url = "https://api-meupet-production.up.railway.app/api/animais-adocao" + (estado_cod ? `?estado_cod=${estado_cod}` : '') + (cidade_cod ? `&cidade_cod=${cidade_cod}` : '');
 
+
+
+  console.log(url);
   // funcao que é executada quando a tela é carregada
   useEffect(() => {
     carregarAnimais();
@@ -71,7 +74,6 @@ export default function Home() {
 
   // funcao responsavel por tratar a opcao selecionada no menu
   const handleMenuOptionSelect = (option) => {
-    console.log(option);
     if (option === 'cadastrar') {
       handleCadastrarAnimal();
     } else if (option === 'meus-anuncios') {
@@ -80,6 +82,8 @@ export default function Home() {
       handleAtualizarPerfil();
     } else if (option === 'minhas-adocoes') {
       handleMinhasAdocoes();
+    } else if (option === 'filtrar') {
+      handleFiltrar();
     }
     setMenuOpen(false);
   };
@@ -95,6 +99,10 @@ export default function Home() {
 
   const handleMinhasAdocoes = () => {
     // Implemente a lógica para navegar para a tela de "Minhas Adoções"
+  };
+
+  const handleFiltrar = () => {
+    navigation.navigate("Filter");
   };
 
   const handleAdotar = (id) => {
@@ -132,6 +140,11 @@ export default function Home() {
               <Text style={styles.dropdownMenuItemText}>Cadastrar</Text>
             </View>
           </TouchableWithoutFeedback>
+          <TouchableWithoutFeedback onPress={() => handleMenuOptionSelect('filtrar')}>
+            <View style={styles.dropdownMenuItem}>
+              <Text style={styles.dropdownMenuItemText}>Filtrar</Text>
+            </View>
+          </TouchableWithoutFeedback>
           <TouchableWithoutFeedback onPress={() => handleMenuOptionSelect('meus-anuncios')}>
             <View style={styles.dropdownMenuItem}>
               <Text style={styles.dropdownMenuItemText}>Meus Anúncios</Text>
@@ -149,25 +162,31 @@ export default function Home() {
           </TouchableWithoutFeedback>
         </Animated.View>
       )}
+      
       <ScrollView contentContainerStyle={styles.scrollContent}>
-        {animais.map((animal) => (
-          <View style={styles.card} key={animal.id}>
-            <Image source={{ uri: animal.imagem }} style={styles.imagem} />
-            <View  style={styles.cardContent}>
-              <Text style={styles.nome}>{animal.nome}</Text>
-              <Text style={styles.descricao}>{animal.descricao}</Text>
-              <Text style={styles.info}>Raça: {animal.raca}</Text>
-              <Text style={styles.info}>Sexo: {animal.sexo}</Text>
-              <Text style={styles.info}>Idade: {animal.idade} anos</Text>
-              <TouchableOpacity onPress={() => handleAdotar(animal.id)}>
-              <View style={styles.adotarButton}>
-                <Text style={styles.adotarButtonText}>Adotar</Text>
-              </View>
-            </TouchableOpacity>
+  {animais.length === 0 ? (
+    <Text style={styles.noRecordsText}>Não há registros disponíveis</Text>
+  ) : (
+    animais.map((animal) => (
+      <View style={styles.card} key={animal.id}>
+        <Image source={{ uri: animal.imagem }} style={styles.imagem} />
+        <View style={styles.cardContent}>
+          <Text style={styles.nome}>{animal.nome}</Text>
+          <Text style={styles.descricao}>{animal.descricao}</Text>
+          <Text style={styles.info}>Raça: {animal.raca}</Text>
+          <Text style={styles.info}>Sexo: {animal.sexo}</Text>
+          <Text style={styles.info}>Idade: {animal.idade} anos</Text>
+          <TouchableOpacity onPress={() => handleAdotar(animal.id)}>
+            <View style={styles.adotarButton}>
+              <Text style={styles.adotarButtonText}>Adotar</Text>
             </View>
-          </View>
-        ))}
-      </ScrollView>
+          </TouchableOpacity>
+        </View>
+      </View>
+    ))
+  )}
+</ScrollView>
+
     </View>
   );
 }
@@ -262,11 +281,21 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     alignItems: 'center',
     justifyContent: 'center',
-    marginTop: 10,
+    marginTop: 10, 
   },
   adotarButtonText: {
     color: 'white',
     fontSize: 16,
     fontWeight: 'bold',
+  },
+  noRecordsText: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    textAlign: 'center',
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: 'white',
+    marginTop: 200, // ajuste esse valor para posicionar o texto no centro vertical da tela
   },
 });

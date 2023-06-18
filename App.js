@@ -10,6 +10,7 @@ import AtualizarPerfil from './src/pages/perfil';
 import CadastrarAnimais from './src/pages/animais/cadastro';
 import AdotarAnimal from './src/pages/animais/show';
 import Filter from './src/pages/filter';
+import PreIndex from './src/pages/home/preindex';
 
 const Stack = createNativeStackNavigator();
 
@@ -20,20 +21,17 @@ const Stack = createNativeStackNavigator();
 
 
 <Stack.Screen  options={{headerShown: false
+      }} name="PreIndex" component={PreIndex} /> 
+<Stack.Screen  options={{headerShown: false
       }} name="Login" component={Login} /> 
-
-{/* 
    <Stack.Screen options={{headerShown: false
       }} name="Bem Vindo!" component={BemVindo} /> 
-
        <Stack.Screen options={{headerShown: false
       }} name="Registro" component={Register} />
 <Stack.Screen options={{headerShown: false
       }} name="Atualizar" component={AtualizarPerfil} /> 
 <Stack.Screen options={{headerShown: false
       }} name="CadatrarAnimais" component={CadastrarAnimais} />
-
-      */}
  <Stack.Screen options={{headerShown: false
       }} name="Filter" component={Filter} />
 
