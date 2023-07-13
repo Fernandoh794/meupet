@@ -1,8 +1,12 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Dimensions, Image, TextInput } from 'react-native';
+import { TextInputMask } from 'react-native-masked-text';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { API_URL } from '../../../apiConfig';
+import * as Animatable from 'react-native-animatable';
+import axios from 'axios';
 import { useNavigation } from '@react-navigation/native';
 
-import * as Animatable from 'react-native-animatable';
 
 export default function AtualizarPerfil() {
 
@@ -10,18 +14,35 @@ export default function AtualizarPerfil() {
         nome: '',
         email: '',
         password: '',
+        telefone: '',
     });
+    const navigation = useNavigation();
 
 
-  const navigation = useNavigation();
-  const nomeUsuario = auth.currentUser.displayName;
 
-  function handleAtualizarPerfil() {
-  }
+
+  async function handleAtualizarPerfil() {
+    const UserId = await AsyncStorage.getItem('user_id');
+    const Token = await AsyncStorage.getItem('access_token');
+    let url = API_URL + '/users/' + UserId;
+    try {
+        const response = await axios.put(url, data, {
+            headers: {
+                Authorization: `Bearer ${Token}`
+            }
+        });
+        if (response.status == 200) {
+            AsyncStorage.setItem('user_logado', data.nome);
+            alert('Perfil Atualizado com Sucesso!');
+            navigation.navigate('PreIndex');
+        }
+    } catch (error) {
+        console.log(error);
+        alert('Erro ao Atualizar Perfil!');
+    }
+}
+
   
-
-    
-
   return (
     <View 
     style={styles.container
@@ -58,6 +79,21 @@ export default function AtualizarPerfil() {
         onChangeText={(text) => setData({...data, password: text})}
         secureTextEntry={true}
         style={styles.input} placeholder="Digite a Senha.."/>
+        <Text style={styles.label}>
+  Telefone
+</Text>
+<TextInputMask
+  onChangeText={(value, teste, tst) => {
+    setData((prevData) => ({ ...prevData, telefone: value }));
+  }}
+  value={data.telefone}
+  style={styles.input}
+  placeholder="Digite o Telefone.."
+  type={'cel-phone'}
+  options={{
+    maskType: 'BRL',
+  }}
+/>
         <TouchableOpacity onPress={handleAtualizarPerfil}
          style={styles.button}>
             <Text style={styles.textButton}>Atualizar!</Text>

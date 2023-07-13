@@ -6,7 +6,8 @@ import Icon from 'react-native-vector-icons/Feather';
 import axios from 'axios';
 import uuid from 'react-native-uuid';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-
+import { API_URL } from '../../../apiConfig';
+import { useNavigation } from '@react-navigation/native';
 
 
 export default function CadastrarAnimais() {
@@ -21,9 +22,11 @@ export default function CadastrarAnimais() {
   const [estados, setEstados] = useState([]);
   const [cidades, setCidades] = useState([]);
   const [urlImagem, setUrlImagem] = useState('');
+  const navigation = useNavigation();
 
   useEffect(() => {
     carregarEstados();
+    verificarSeExisteTelefone();
   }, []);
 
   // Implemente a lógica para carregar os estados da API do IBGE
@@ -40,6 +43,7 @@ export default function CadastrarAnimais() {
   // Implemente a lógica para carregar as cidades de acordo com o estado selecionado
   const carregarCidades = async (estadoId) => {
     try {
+   
       const response = await axios.get(`https://servicodados.ibge.gov.br/api/v1/localidades/estados/${estadoId}/municipios`);
       setCidades(response.data);
     } catch (error) {
@@ -47,6 +51,30 @@ export default function CadastrarAnimais() {
     }
   };
 
+  // verifica se o usuario tem telefone cadastrado antes de cadastrar um animal
+  const verificarSeExisteTelefone = async () => {
+    const user = await AsyncStorage.getItem('user_id');  
+    const token = await AsyncStorage.getItem('access_token');  
+    try {
+        let url = `${API_URL}/users/${user}`;
+        const response = await axios.get(url, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+       if(response.data.telefone == null){
+        alert('Você precisa cadastrar um telefone para cadastrar um animal, vá para edição de perfil e cadastre um telefone');
+        navigation.navigate('PreIndex')
+       }
+    } catch (error) {
+      console.log('Erro ao verificar telefone:', error);
+    }
+  };
+    
+        
+        
+      
+ 
 
   // Implemente a lógica para fazer upload da imagem no Cloudinary
   const uploadImageClodinary = async () => {
@@ -66,15 +94,19 @@ export default function CadastrarAnimais() {
         method: 'POST',
         body: data
       });
-
+      if (!response.ok) {
+        throw new Error('Não foi possível fazer upload da imagem');
+      }
       const jsonData = await response.json();
       setUrlImagem(jsonData.url);
       console.log(urlImagem);
       handleCadastrarAnimal();
-    } catch (error) {
-      Alert.alert('Erro', 'Erro ao fazer upload da imagem');
-      console.log('Erro ao fazer upload da imagem:', error);
+    } catch (err) {
+      alert('Erro ao fazer upload da imagem' + err);
     }
+
+ 
+
   };
 
 
@@ -92,7 +124,7 @@ export default function CadastrarAnimais() {
    */
   // Implemente a lógica para cadastrar um novo animal
   const handleCadastrarAnimal = () => {
-    const urlPost = "https://api-meupet-production.up.railway.app/api/animais-adocao";
+    const urlPost = API_URL + "/animais-adocao";
   
     // Recuperar o token do AsyncStorage
     AsyncStorage.getItem('access_token')
@@ -109,9 +141,6 @@ export default function CadastrarAnimais() {
             descricao: descricao
           };
 
-          console.log(data);
-          
-  
           const headers = {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${token}`
@@ -121,18 +150,16 @@ export default function CadastrarAnimais() {
             .then((response) => {
               console.log(response);
               Alert.alert('Sucesso', 'Animal cadastrado com sucesso!');
+              navigation.navigate('PreIndex')
+
             })
             .catch((error) => {
               console.log(error);
               Alert.alert('Erro', 'Erro ao cadastrar animal!');
             });
         } else {
-          // Caso o token não esteja disponível no AsyncStorage
           Alert.alert('Erro', 'Token de acesso não encontrado!');
         }
-
-
-
       })
       .catch((error) => {
         console.log(error);

@@ -3,18 +3,17 @@ import { View, Text, StyleSheet, TextInput, TouchableOpacity } from "react-nativ
 import axios from "axios";
 import { useNavigation } from "@react-navigation/native";
 import * as Animatable from 'react-native-animatable';
+import { API_URL } from "../../../apiConfig";
 
 export default function Register() {
     const navigation = useNavigation();
-
-        const [data, setData] = React.useState({
-        nome: '',
-        email: '',
-        password: '',
+    const [data, setData] = React.useState({
+    nome: '',
+    email: '',
+    password: '',
 
     });
-
-    let url = "https://api-meupet-production.up.railway.app/api/register";
+    let url = API_URL + "/register";
     const handleCreateAcount = () => {
         axios.post(url, {
             name: data.nome,
@@ -25,6 +24,8 @@ export default function Register() {
             if(response.status == 201){
                 alert("Conta criada com sucesso!");
                 navigation.navigate("Login");
+            } else if (response.status == 422){
+                alert("Email invalido!, tente outro")
             }
         })
         .catch(function (error) {

@@ -195,22 +195,11 @@ export default function Filter() {
               <Text style={styles.dropdownMenuItemText}>Filtrar</Text>
             </View>
           </TouchableWithoutFeedback>
-          <TouchableWithoutFeedback onPress={() => handleMenuOptionSelect('meus-anuncios')}>
-            <View style={styles.dropdownMenuItem}>
-              <Text style={styles.dropdownMenuItemText}>Meus Anúncios</Text>
-            </View>
-          </TouchableWithoutFeedback>
           <TouchableWithoutFeedback onPress={() => handleMenuOptionSelect('atualizar-perfil')}>
             <View style={styles.dropdownMenuItem}>
               <Text style={styles.dropdownMenuItemText}>Atualizar Perfil</Text>
             </View>
           </TouchableWithoutFeedback>
-          <TouchableWithoutFeedback onPress={() => handleMenuOptionSelect('minhas-adocoes')}>
-            <View style={styles.dropdownMenuItem}>
-              <Text style={styles.dropdownMenuItemText}>Minhas Adoções</Text>
-            </View>
-          </TouchableWithoutFeedback>
-
           {/* Espaço para a versão do aplicativo */}
           <View style={styles.versionContainer}>
             <Text style={styles.versionText}>Versão: 1.0.0</Text>

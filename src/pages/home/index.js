@@ -5,28 +5,31 @@ import Icon from 'react-native-vector-icons/Feather';
 import { useNavigation } from "@react-navigation/native";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRoute } from '@react-navigation/native';
+import { API_URL } from "../../../apiConfig";
+import { Linking, Alert  } from 'react-native';
+
 
 export default function Home() {
   const [animais, setAnimais] = useState([]);
-  const [menuOpen, setMenuOpen] = useState(false);
-  const dropdownAnim = useRef(new Animated.Value(0)).current;
+
   const navigation = useNavigation();
   const route = useRoute();
   const { estado_cod, cidade_cod } = route.params;
-  const url = "https://api-meupet-production.up.railway.app/api/animais-adocao" + (estado_cod ? `?estado_cod=${estado_cod}` : '') + (cidade_cod ? `&cidade_cod=${cidade_cod}` : '');
+  const url = API_URL +  "/animais-adocao" + (estado_cod ? `?estado_cod=${estado_cod}` : '') + (cidade_cod ? `&cidade_cod=${cidade_cod}` : '');
+  const [userLogado, setUserLogado] = useState(null);
 
-
-
-  console.log(url);
-  // funcao que é executada quando a tela é carregada
   useEffect(() => {
     carregarAnimais();
+    getUserLogado();
   }, []);
 
-
-
+  const getUserLogado = async () => {
+    const userLogado = await AsyncStorage.getItem('user_id');
+    setUserLogado(userLogado);
+  };
   // funcao que carrega os animais da API passando o token de autenticacao
   const carregarAnimais = async () => {
+    console.log(userLogado);
     AsyncStorage.getItem('access_token')
       .then((token) => { 
         axios.get(url, {
@@ -47,149 +50,126 @@ export default function Home() {
       });
   };
 
-  // funcao que navega para a tela de detalhes do animal
-  const handleCadastrarAnimal = () => {
-    navigation.navigate("CadastrarAnimais");
+const handleDelete = (id) => {
+    Alert.alert(
+      'Excluir Anúncio',
+      'Tem certeza que deseja excluir este anúncio?',
+      [
+        {
+          text: 'Cancelar',
+          style: 'cancel',
+        },
+        {
+          text: 'Excluir',
+          onPress: () => {
+            AsyncStorage.getItem('access_token')
+              .then((token) => {
+                axios.delete(`${API_URL}/animais-adocao/${id}`, {
+                  headers: {
+                    Authorization: `Bearer ${token}`,
+                  },
+                })
+                  .then((response) => {
+                    console.log('Animal excluído com sucesso:', response.data);
+                    carregarAnimais();
+                  })
+                  .catch((error) => {
+                    console.log('Erro ao excluir animal:', error);
+                  });
+              })
+              .catch((error) => {
+                console.log('Erro ao recuperar o token:', error);
+              });
+          },
+        },
+      ],
+      { cancelable: false },
+    );
   };
 
-  const handlePesquisar = () => {
-    // Implemente a lógica para pesquisar e filtrar os animais
-  };
+
+
+
 
   const handleLogout = () => {
-    // Implemente a lógica para realizar o logout do usuário
-  };
-
-  
-  // funcao que é executada quando o botao de menu é clicado
-  const handleDropdownToggle = () => {
-    setMenuOpen((prevState) => !prevState);
-    Animated.timing(dropdownAnim, {
-      toValue: menuOpen ? 0 : 1,
-      duration: 200,
-      useNativeDriver: true,
-    }).start();
-  };
-
-
-  // funcao responsavel por tratar a opcao selecionada no menu
-  const handleMenuOptionSelect = (option) => {
-    if (option === 'cadastrar') {
-      handleCadastrarAnimal();
-    } else if (option === 'meus-anuncios') {
-      handleMeusAnuncios();
-    } else if (option === 'atualizar-perfil') {
-      handleAtualizarPerfil();
-    } else if (option === 'minhas-adocoes') {
-      handleMinhasAdocoes();
-    } else if (option === 'filtrar') {
-      handleFiltrar();
-    }
-    setMenuOpen(false);
-  };
-
-
-  const handleMeusAnuncios = () => {
-    // Implemente a lógica para navegar para a tela de "Meus Anúncios"
-  };
-
-  const handleAtualizarPerfil = () => {
-    // Implemente a lógica para navegar para a tela de "Atualizar Perfil"
-  };
-
-  const handleMinhasAdocoes = () => {
-    // Implemente a lógica para navegar para a tela de "Minhas Adoções"
-  };
-
-  const handleFiltrar = () => {
-    navigation.navigate("Filter");
-  };
-
-  const handleAdotar = (id) => {
-      navigation.navigate("AdotarAnimal", { id });
-  };
-
-  const dropdownOpacity = dropdownAnim.interpolate({
-    inputRange: [0, 1],
-    outputRange: [0, 1],
-  });
-
-  const dropdownTranslateY = dropdownAnim.interpolate({
-    inputRange: [0, 1],
-    outputRange: [-100, 0],
-  });
-
-
+    AsyncStorage.removeItem('access_token');
+    navigation.navigate('Login');  };
 
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <TouchableOpacity onPress={handleDropdownToggle}>
-          <View style={styles.dropdownButton}>
-            <Icon name="menu" size={24} color="white" />
-          </View>
-        </TouchableOpacity>
         <TouchableOpacity style={styles.button} onPress={handleLogout}>
           <Icon name="log-out" size={24} color="white" />
         </TouchableOpacity>
       </View>
-      {menuOpen && (
-        <Animated.View style={[styles.dropdownMenu, { opacity: dropdownOpacity, transform: [{ translateY: dropdownTranslateY }] }]}>
-          <TouchableWithoutFeedback onPress={() => handleMenuOptionSelect('cadastrar')}>
-            <View style={styles.dropdownMenuItem}>
-              <Text style={styles.dropdownMenuItemText}>Cadastrar</Text>
-            </View>
-          </TouchableWithoutFeedback>
-          <TouchableWithoutFeedback onPress={() => handleMenuOptionSelect('filtrar')}>
-            <View style={styles.dropdownMenuItem}>
-              <Text style={styles.dropdownMenuItemText}>Filtrar</Text>
-            </View>
-          </TouchableWithoutFeedback>
-          <TouchableWithoutFeedback onPress={() => handleMenuOptionSelect('meus-anuncios')}>
-            <View style={styles.dropdownMenuItem}>
-              <Text style={styles.dropdownMenuItemText}>Meus Anúncios</Text>
-            </View>
-          </TouchableWithoutFeedback>
-          <TouchableWithoutFeedback onPress={() => handleMenuOptionSelect('atualizar-perfil')}>
-            <View style={styles.dropdownMenuItem}>
-              <Text style={styles.dropdownMenuItemText}>Atualizar Perfil</Text>
-            </View>
-          </TouchableWithoutFeedback>
-          <TouchableWithoutFeedback onPress={() => handleMenuOptionSelect('minhas-adocoes')}>
-            <View style={styles.dropdownMenuItem}>
-              <Text style={styles.dropdownMenuItemText}>Minhas Adoções</Text>
-            </View>
-          </TouchableWithoutFeedback>
-        </Animated.View>
-      )}
       
       <ScrollView contentContainerStyle={styles.scrollContent}>
-  {animais.length === 0 ? (
-    <Text style={styles.noRecordsText}>Não há registros disponíveis</Text>
-  ) : (
-    animais.map((animal) => (
-      <View style={styles.card} key={animal.id}>
-        <Image source={{ uri: animal.imagem }} style={styles.imagem} />
-        <View style={styles.cardContent}>
-          <Text style={styles.nome}>{animal.nome}</Text>
-          <Text style={styles.descricao}>{animal.descricao}</Text>
-          <Text style={styles.info}>Raça: {animal.raca}</Text>
-          <Text style={styles.info}>Sexo: {animal.sexo}</Text>
-          <Text style={styles.info}>Idade: {animal.idade} anos</Text>
-          <TouchableOpacity onPress={() => handleAdotar(animal.id)}>
-            <View style={styles.adotarButton}>
-              <Text style={styles.adotarButtonText}>Adotar</Text>
+{animais.length === 0 ? (
+  <Text style={styles.noRecordsText}>Não há registros disponíveis</Text>
+) : (
+  animais.map((animal) => (
+    <View style={styles.card} key={animal.id}>
+      <Image source={{ uri: animal.imagem }} style={styles.imagem} />
+      <View style={styles.cardContent}>
+        <Text style={styles.nome}>{animal.nome}</Text>
+        <Text style={styles.descricao}>{animal.descricao}</Text>
+        <Text style={styles.info}>Raça: {animal.raca}</Text>
+        <Text style={styles.info}>Sexo: {animal.sexo}</Text>
+        <Text style={styles.info}>Idade: {animal.idade} anos</Text>
+        <Text style={styles.info}>Usuario: {animal.usuario}</Text>
+        {userLogado == animal.user_id ? (
+          <TouchableOpacity onPress={() => handleDelete(animal.id)}>
+            <View style={styles.deleteButton}>
+              <Text style={styles.deleteButtonText}>Excluir Anúncio</Text>
             </View>
           </TouchableOpacity>
-        </View>
+        ) : (
+          <TouchableOpacity onPress={() => openWhatsApp(animal.contato)}>
+            <View style={styles.whatsappButton}>
+              <Text style={styles.whatsappButtonText}>Iniciar Conversa</Text>
+            </View>
+          </TouchableOpacity>
+        )}
       </View>
-    ))
-  )}
+    </View>
+  ))
+)}
+
 </ScrollView>
 
     </View>
   );
 }
+
+const openWhatsApp = (numero) => {
+  const whatsappUrl = `whatsapp://send?phone=${numero}`;
+  const phoneNumber = `tel:${numero}`;
+
+  Linking.canOpenURL(whatsappUrl)
+    .then((supported) => {
+      if (supported) {
+        return Linking.openURL(whatsappUrl);
+      } else {
+        Alert.alert(
+          'Não foi possível abrir o WhatsApp',
+          'Deseja fazer uma ligação?',
+          [
+            {
+              text: 'Sim',
+              onPress: () => Linking.openURL(phoneNumber),
+            },
+            {
+              text: 'Não',
+              style: 'cancel',
+            },
+          ]
+        );
+      }
+    })
+    .catch((error) => {
+      console.log(error);
+    });
+};
 
 const styles = StyleSheet.create({
   container: {
@@ -297,5 +277,30 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: 'white',
     marginTop: 200, // ajuste esse valor para posicionar o texto no centro vertical da tela
+  },
+  whatsappButton: {
+    backgroundColor: '#25D366', // Cor de fundo do WhatsApp
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 5,
+    marginTop: 10,
+  },
+  whatsappButtonText: {
+    color: '#FFFFFF', // Cor do texto do WhatsApp
+    fontSize: 16,
+    fontWeight: 'bold',
+    textAlign: 'center',
+  },
+  deleteButton: {
+    backgroundColor: 'red',
+    padding: 10,
+    borderRadius: 5,
+    marginTop: 10,
+    alignItems: 'center',
+  },
+  deleteButtonText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: 'bold',
   },
 });

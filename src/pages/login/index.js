@@ -2,6 +2,7 @@ import React from "react";
 import { View, Text, StyleSheet, TextInput, TouchableOpacity, ActivityIndicator } from "react-native";
 import axios from "axios";
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { API_URL } from "../../../apiConfig";
 
 import * as Animatable from 'react-native-animatable';
 import { useNavigation } from "@react-navigation/native";
@@ -11,7 +12,7 @@ export default function Login() {
   const [Email, setEmail] = React.useState('');
   const [Senha, setSenha] = React.useState('');
   const [isLoading, setLoading] = React.useState(false); // Estado para controlar o loading
-  let url = "https://api-meupet-production.up.railway.app/api/login";
+  let url = API_URL + "/login";
 
   function handleLogin() {
     setLoading(true); // Ativar o loading ao iniciar a requisição
@@ -26,14 +27,15 @@ export default function Login() {
         // Salvar o token no AsyncStorage
         AsyncStorage.setItem('access_token', token)
         AsyncStorage.setItem('user_logado', response.data.user.name)
+        AsyncStorage.setItem('user_id', response.data.user.id.toString())
           .then(() => {
-            navigation.navigate("Filter");
+            navigation.navigate("PreIndex");
           })
           .catch((error) => {
             console.log(error);
           });
       }
-      setLoading(false); // Desativar o loading após receber a resposta da API
+      setLoading(false); // Desativar o loading após receber ok da API
     })
     .catch(function (error) {
       setLoading(false); // Desativar o loading em caso de erro
